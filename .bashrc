@@ -146,8 +146,6 @@ export PS1='\[\e[1;90m\][\u@\h:\w]$\[\e[0m\] ' #grey
 #export PROMPT_COMMAND='echo -ne "\033]0;${USER}@${HOSTNAME}: ${PWD}\007"'
 export TERM=xterm-color
 
-alias mount-dil='sshfs nikolas@linapp-1:/home/nikolas /Users/pontikos/dil'
-
 export PYTHONSTARTUP=~/.pythonrc
 export PYTHONPATH=$HOME/.local/lib:$PYTHON/lib/python2.7
 
