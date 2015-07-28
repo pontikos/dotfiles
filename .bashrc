@@ -1,6 +1,5 @@
 source ~/dil-tunnels.sh
 source ~/ucl-tunnels.sh
-
 #reports unbound bash variables
 set -u
 # Basic External source
@@ -8,7 +7,40 @@ set -u
 #pdflatex and other latex utilities are in /usr/texbin
 export PATH=$HOME/bin:/usr/texbin/:$PATH
 
-alias ldd='otool -L'
+if [[ `uname` == Darwin ]]
+then
+    alias ldd='otool -L'
+fi
+
+#python
+export PYTHON=/share/apps/python-2.7.3-static
+export PATH=$PYTHON/bin/:$PATH
+#pdflatex and other latex utilities are in /usr/texbin
+export vyp_software=/cluster/project8/vyp/vincent/Software
+export pontikos_software=/cluster/project8/vyp/pontikos/Software
+export PATH=$HOME/bin:/usr/texbin/:$PATH
+export PATH=$HOME/.local/bin:$PATH
+export PATH=/share/apps/R:$PATH
+export PATH=$HOME/bin/VAAST_Code_2.1.4/:$PATH
+export PATH=$HOME/bin/ctags-5.8/:$PATH
+export PATH=$HOME/bin/axel-1.0b/:$PATH
+#novoalign
+export PATH=${vyp_software}/novocraft3/:$PATH
+#samtools
+export PATH=${vyp_software}/samtools-1.1/:$PATH
+#bedtools
+export PATH=${vyp_software}/bedtools-2.17.0/bin/:$PATH
+#vcftools
+export PATH=${vyp_software}/vcftools_0.1.12a/bin:$PATH
+#tabix
+export PATH=${vyp_software}/tabix-0.2.3/:$PATH
+#pVAAST
+pVAAST=$pontikos_software/VAAST_Code_2.1.4/
+export PATH=$pVAAST/bin:$pVAAST/bin/vaast_tools:$PATH
+#R
+export PATH=$HOME/R-3.1.2/bin:$PATH
+#vcflib
+export PATH=$pontikos_software/vcflib/bin:$PATH
 
 # Env var
 export EDITOR=/usr/bin/vim
@@ -17,6 +49,8 @@ alias gvim=/usr/bin/mvim
 
 alias ll='ls -la'
 alias l='ls -Glrt'
+alias l='ls -lrt'
+alias zless='zless -S'
 
 # rlwrap specific
 export RLWRAP_EDITOR="vim +%L +%C"
@@ -124,15 +158,51 @@ BIBlack='\e[1;90m'      # Black
 #export PS1='\[\e[1;31m\][\u@\h:\w]\$\[\e[0m\] ' # red color
 #export PS1='\[\e[2;32m\][\u@\h:\w]\$\[\e[0m\] ' # green color
 #export PS1='[\u@\h:\w]\$ ' #grey
-export PS1="\[$BIBlack\][\u@\h:\w]\$\[$txtrst\] " #grey
-export PROMPT_COMMAND='echo -ne "\033]0;${USER}@${HOSTNAME}: ${PWD}\007"'
+if [[ `uname` == Darwin ]]
+then
+    export PS1="\[$BIBlack\][\u@\h:\w]\$\[$txtrst\] " #grey
+    export PROMPT_COMMAND='echo -ne "\033]0;${USER}@${HOSTNAME}: ${PWD}\007"'
+    export TERM=xterm-color
+    export PYTHONSTARTUP=~/.pythonrc
+    PERL_MB_OPT="--install_base \"/Users/pontikos/perl5\""; export PERL_MB_OPT;
+    PERL_MM_OPT="INSTALL_BASE=/Users/pontikos/perl5"; export PERL_MM_OPT;
+    export PATH=$PATH:/Users/pontikos/VAAST_Code_2.1.4
+    #
+    export DYLD_INSERT_LIBRARIES="/Users/pontikos/stderred/build/libstderred.dylib${DYLD_INSERT_LIBRARIES:+:$DYLD_INSERT_LIBRARIES}"
+else
+    export PS1='\[\e[1;90m\][\u@\h:\w]$\[\e[0m\] ' #grey
+fi
+
+#export PROMPT_COMMAND='echo -ne "\033]0;${USER}@${HOSTNAME}: ${PWD}\007"'
 export TERM=xterm-color
 
 export PYTHONSTARTUP=~/.pythonrc
+export PYTHONPATH=$HOME/.local/lib:$PYTHON/lib/python2.7
 
-PERL_MB_OPT="--install_base \"/Users/pontikos/perl5\""; export PERL_MB_OPT;
-PERL_MM_OPT="INSTALL_BASE=/Users/pontikos/perl5"; export PERL_MM_OPT;
+alias qsh='qrsh -wd $PWD -pty y -l tmem=1G,h_vmem=1G,h_rt=2:0:0 bash'
+alias bigqsh='qrsh -wd $PWD -pty y -l tmem=8G,h_vmem=8G,h_rt=8:0:0 bash'
 
-export PATH=$PATH:/Users/pontikos/VAAST_Code_2.1.4
-#
-export DYLD_INSERT_LIBRARIES="/Users/pontikos/stderred/build/libstderred.dylib${DYLD_INSERT_LIBRARIES:+:$DYLD_INSERT_LIBRARIES}"
+# follows symlink
+alias pwd='pwd -P'
+#alias cd='cd -P'
+
+#perl nonsense
+set +u
+source ~/perl5/perlbrew/etc/bashrc
+#export PERL5LIB=/home/rmhanpo/perl5/lib/perl5/x86_64-linux-thread-multi/local.pod/:$PERL5LIB
+export PERL5LIB=/home/rmhanpo/perl5/lib/perl5:$PERL5LIB
+export PERL5LIB=${vyp_software}/vcftools_0.1.12a/lib/perl5/site_perl:$PERL5LIB
+
+function fullpath() {
+    echo `pwd -P`/$1
+}
+
+export BCF_TOOLS=$pontikos_software/bcftools/
+export PATH=$BCF_TOOLS:$PATH
+export BCFTOOLS_PLUGINS=$BCF_TOOLS/plugins
+export LD_LIBRARY_PATH=$BCFTOOLS/plugins/:$pontikos_software/htslib/
+
+function linkchk() {
+    find $1 -type l -print0 | xargs -r0 file | grep "broken symbolic"| sed -e 's/^\|: *broken symbolic.*$//g'
+}
+
